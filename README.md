@@ -1,4 +1,26 @@
 # ThesisUESTC-电子科技大学毕业论文模板
+
+> **Fork Notes (tyxWilliam)**  
+> 为了便于课堂实践报告与通用论文写作，我在原模板基础上做了几点定制，读者可按需启用或忽略。
+> 
+> 1. **Linux 默认宋黑体改为 `simsun.ttc` / `simhei.ttf`**  
+>    - 请将相关字体复制到仓库根目录下的 `fonts/` 文件夹（推荐做法），模板会自动从该目录加载；如需系统级安装，可放入 `/usr/local/share/fonts/uestc/` 并执行 `sudo fc-cache -fv`。  
+>    - 若仍需使用原版 `fzsong/fzhei`，只需在 `thesis-uestc.cls` Linux 分支恢复相应文件名即可。
+> 2. **新增页眉简化开关 `\simplifyheader`**  
+>    - 在导言区（` \begin{document}` 之前）调用 `\simplifyheader`，即可令所有页面的页眉仅显示当前章节名；不调用则维持上游模板“奇数页章节名 / 偶数页固定标题”的默认行为。  
+>    - 该命令无参数，如需恢复默认可在之后手动 `\pagestyle{fancy}` 并重新设置页眉。
+> 3. **第一章页眉不再强制显示“绪论”**  
+>    - 原模板会把第一章页眉写死为“绪论/Introduction”。此 fork 中改为尊重章节实际标题，以免撰写实践报告等非标准论文时出现不必要的文字。  
+>    - 若希望保留原行为，可在 `thesis-uestc.cls` 中找到相关注释，解除注释即可。
+> 4. **新增 `thesiscode` 代码块体系（支持外部文件）**  
+>    - 版式完全复用算法块：外框、caption 与编号形如“代码 3-1”，便于与其它图表统一排版。正文仍是纯文本代码框，字号为小五（10.5pt），ASCII 字符使用 Consolas，中文自动切回宋体；左侧行号固定 8pt 并使用 Times 字体，与算法块保持一致，空格与缩进都被保留，便于复制。  
+>    - 推荐把代码片段放在仓库根目录的 `code/` 文件夹，然后使用 `\thesiscodefile[<浮动>][<标题>][<标签>]{demo.cpp}` 引用。浮动参数默认 `H`，标题/标签可选，标签可配合 `\ref`，并可通过 `\listofthesiscodes` 生成“代码列表”。  
+>    - 若仍需直接在 `.tex` 中输入，可使用 `\begin{thesiscode}[...][标题][标签] ... \end{thesiscode}`，但需遵守 LaTeX 的特殊字符转义规则。  
+>    - 模板会优先查找系统字体名 `Consolas`，若不存在则在 `fonts/` 子目录中寻找 `consola.ttf / Consola.ttf` 并自动加载。  
+>    - 如果字体仍未被识别，可按需将 Windows 的 `consola*.ttf` 拷贝到 `/usr/local/share/fonts/uestc/` 并执行 `sudo fc-cache -fv`，或放到 `./fonts/` 后重新编译。`fc-list | grep -i consolas` 可用于确认系统是否已注册该字体。
+> 
+> 以上为相对上游的全部功能差异，其余使用说明与原项目保持一致。
+
 [![](https://img.shields.io/badge/license-LPPL-blue)](https://www.latex-project.org/lppl/) [![](https://img.shields.io/github/last-commit/x-magus/ThesisUESTC)](https://github.com/x-magus/ThesisUESTC/zipball/master) [![](https://img.shields.io/github/issues/x-magus/ThesisUESTC)](https://github.com/x-magus/ThesisUESTC/issues)
 
 此项目提供用于排版电子科技大学毕业论文的LaTeX模板类，旨在帮助电子科技大学的毕业生高效地完成毕业论文的写作。模板提供各种方便的命令，自动化地排版论文的各个部分，使毕业论文轻易地满足学校的格式要求。为了支持更好的字体效果，模板基于XeLaTeX编写，并且放弃对CTeX的依赖，使模板更加稳定。

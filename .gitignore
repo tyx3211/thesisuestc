@@ -15,3 +15,10 @@
 !./example.pdf
 
 .DS_Store
+
+.vscode/
+/practice_report.tex
+/practice_report.pdf
+/fonts-thesis.zip
+/main.pdf
+/习思想.md

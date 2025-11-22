@@ -47,6 +47,11 @@
 \RequirePackage{xeCJK}
 \RequirePackage{ifplatform}
 
+% 页眉简化开关：启用后所有页面页眉都显示章节名，否则奇偶页不同
+\newif\ifthesis@simplifyheader
+\thesis@simplifyheaderfalse
+\newcommand{\simplifyheader}{\thesis@simplifyheadertrue}
+
 \ifwindows
   \setCJKmainfont[AutoFakeBold=true]{SimSun}
   \newCJKfontfamily{\heiti}{SimHei}
@@ -59,14 +64,15 @@
   \newfontfamily{\heiti@letter}{STHeiti}
   \setallmainfonts{Times New Roman}
 \else
-  \setCJKmainfont[AutoFakeBold=true]{fzsong.ttf}
-  \newCJKfontfamily{\heiti}{fzhei.ttf}
-  \newfontfamily{\heiti@letter}{fzhei.ttf}
+  \setCJKmainfont[Path=fonts/,AutoFakeBold=true]{simsun.ttc} % 宋体
+  \newCJKfontfamily{\heiti}[Path=fonts/]{simhei.ttf} % 黑体
+  \newfontfamily{\heiti@letter}[Path=fonts/]{simhei.ttf} % 黑体英文字体
   \setallmainfonts[
+    Path=fonts/,
     BoldFont=timesbd.ttf,
     ItalicFont=timesi.ttf,
     BoldItalicFont=timesbi.ttf,
-  ]{times.ttf}
+  ]{times.ttf} % 英文Times New Roman字体
 \fi
 \fi
 
@@ -93,6 +99,7 @@
 %\RequirePackage{calc}
 \RequirePackage{float}
 \RequirePackage{fancyvrb}
+\RequirePackage{fvextra}
 \RequirePackage{fancyhdr}
 \RequirePackage{titlesec}
 \RequirePackage{appendix}
@@ -103,6 +110,7 @@
 \RequirePackage[algochapter, boxruled, linesnumbered]{algorithm2e}
 
 \RequirePackage{etoolbox}
+\RequirePackage{xparse}
 \RequirePackage{newfloat}
 \RequirePackage[resetlabels]{multibib}
 \RequirePackage[nottoc]{tocbibind}
@@ -528,6 +536,126 @@
 \AtBeginEnvironment{algorithm}{\vspace{9pt}}
 \AfterEndEnvironment{algorithm}{\vspace{9pt}}
 
+\newfloat{thesiscodefloat}{htbp}{loc}[chapter]
+\renewcommand{\thethesiscodefloat}{\arabic{chapter}-\arabic{thesiscodefloat}}
+\newcommand{\thesiscodecaptionname}{代码}
+\newcommand{\thesiscodelisttitle}{代码列表}
+\ifchinesebook{
+  \floatname{thesiscodefloat}{代码}
+  \newcommand{\listofthesiscodes}{\listof{thesiscodefloat}{代码列表}}
+}{
+  \floatname{thesiscodefloat}{Code}
+  \renewcommand{\thesiscodecaptionname}{Code}
+  \renewcommand{\thesiscodelisttitle}{List of Codes}
+  \newcommand{\listofthesiscodes}{\listof{thesiscodefloat}{List of Codes}}
+}
+\captionsetup[thesiscodefloat]{aboveskip=6pt, belowskip=0pt}
+
+\newcommand{\thesiscode@numberfont}{\fontsize{8pt}{12pt}\selectfont\bfseries\rmfamily}
+\newcommand{\thesiscodebasedir}{code/}
+\newcommand{\thesiscode@set@numberfont}{%
+  \renewcommand{\theFancyVerbLine}{\thesiscode@numberfont\arabic{FancyVerbLine}}%
+}
+
+\newcounter{thesiscode@algstore}
+\newcommand{\thesiscode@addtolist}{%
+  \addcontentsline{loc}{thesiscodefloat}{\protect\numberline{\thethesiscodefloat}\thesiscode@caption}%
+}
+
+\newcommand{\thesiscode@fontswitch}{\ttfamily}
+\newcommand{\thesis@setcodefont}{%
+  \def\thesiscode@fontswitch{\ttfamily}%
+  \IfFileExists{fonts/consola.ttf}{
+    \def\thesiscode@fontswitch{\fontspec[Path=fonts/]{consola.ttf}}%
+  }{
+    \IfFileExists{fonts/Consola.ttf}{
+      \def\thesiscode@fontswitch{\fontspec[Path=fonts/]{Consola.ttf}}%
+    }{
+      \IfFontExistsTF{Consolas}{
+        \def\thesiscode@fontswitch{\fontspec{Consolas}}%
+      }{
+        \PackageWarningNoLine{thesis-uestc}{Consolas font not found. Falling back to monospaced default.}%
+      }
+    }
+  }
+}
+\thesis@setcodefont
+\newcommand{\thesiscodefont}{%
+  \thesiscode@fontswitch
+  \fontsize{10.5pt}{15.75pt}\selectfont}
+
+\newcommand{\thesiscode@begin}[3]{%
+  \def\thesiscode@caption{#2}%
+  \def\thesiscode@label{#3}%
+  \refstepcounter{thesiscodefloat}%
+  \protected@edef\@currentlabel{\thethesiscodefloat}%
+  \setcounter{thesiscode@algstore}{\value{algocf}}%
+  \setcounter{algocf}{\value{thesiscodefloat}}%
+  \addtocounter{algocf}{-1}%
+  \let\thesiscode@oldthealgocf\thealgocf
+  \renewcommand{\thealgocf}{\thethesiscodefloat}%
+  \let\thesiscode@oldalgname\algorithmcfname
+  \renewcommand{\algorithmcfname}{\thesiscodecaptionname}
+  \thesis@setcodefont
+  \LinesNotNumbered
+  \begin{algorithm}[#1]
+    \ifx\thesiscode@caption\@empty\else
+      \caption{\thesiscode@caption}
+      \ifx\thesiscode@label\@empty\else
+        \label{\thesiscode@label}
+      \fi
+      \thesiscode@addtolist
+    \fi
+}
+
+\newcommand{\thesiscode@end}{%
+  \end{algorithm}
+  \setcounter{algocf}{\value{thesiscode@algstore}}%
+  \let\algorithmcfname\thesiscode@oldalgname
+  \let\thealgocf\thesiscode@oldthealgocf
+  \LinesNumbered
+}
+
+\NewDocumentEnvironment{thesiscode}{O{H} o o}{
+  \VerbatimEnvironment
+  \IfNoValueTF{#2}{\def\thesiscode@cap{}}{\def\thesiscode@cap{#2}}
+  \IfNoValueTF{#3}{\def\thesiscode@lab{}}{\def\thesiscode@lab{#3}}
+  \thesiscode@begin{#1}{\thesiscode@cap}{\thesiscode@lab}
+  \thesiscode@set@numberfont
+  \vspace{-2pt}
+  \begin{Verbatim}[numbers=left,
+    numberblanklines=true,
+    numbersep=6pt,
+    xleftmargin=0pt,
+    stepnumber=1,
+    breaklines=true,
+    % breakanywhere=true,
+    formatcom=\thesiscodefont]
+}{
+  \end{Verbatim}
+  \vspace{-9pt}
+  \thesiscode@end
+}
+
+\NewDocumentCommand{\thesiscodefile}{O{H} o o m}{
+  \IfNoValueTF{#2}{\def\thesiscode@cap{}}{\def\thesiscode@cap{#2}}
+  \IfNoValueTF{#3}{\def\thesiscode@lab{}}{\def\thesiscode@lab{#3}}
+  \thesiscode@begin{#1}{\thesiscode@cap}{\thesiscode@lab}
+  \thesiscode@set@numberfont
+  \vspace{-2pt}
+  \VerbatimInput[
+    numbers=left,
+    numberblanklines=true,
+    numbersep=6pt,
+    xleftmargin=0pt,
+    stepnumber=1,
+    breaklines=true,
+    % breakanywhere=true,
+    formatcom=\thesiscodefont]{\thesiscodebasedir#4}
+  \vspace{-9pt}
+  \thesiscode@end
+}
+
 %\renewcommand*{\glossarypreamble}{\vspace{-9pt}}
 \newacronymstyle{acronym-uestc}{
   \ifglshaslong{\glslabel}{\glsgenacfmt}{\glsgenentryfmt}
@@ -827,13 +955,23 @@ School: & \en@theschool \\
 
 \newcommand{\standardheader}{
   \fancyhf{}
-  \ifchinesebook{
-    \fancyhead[CE]{\fontsize{10.5pt}{12.6pt}\selectfont\display@chineseheader}
-    \fancyhead[CO]{\fontsize{10.5pt}{12.6pt}\selectfont\leftmark}
-  }{
-    \fancyhead[CE]{\fontsize{10.5pt}{12.6pt}\selectfont\nouppercase\display@englishheader}
-    \fancyhead[CO]{\fontsize{10.5pt}{12.6pt}\selectfont\nouppercase\leftmark}
-  }
+  \ifthesis@simplifyheader
+    % 简化页眉：所有页面都显示章节名
+    \ifchinesebook{
+      \fancyhead[C]{\fontsize{10.5pt}{12.6pt}\selectfont\leftmark}
+    }{
+      \fancyhead[C]{\fontsize{10.5pt}{12.6pt}\selectfont\nouppercase\leftmark}
+    }
+  \else
+    % 标准页眉：奇数页显示章节名，偶数页显示论文标题
+    \ifchinesebook{
+      \fancyhead[CE]{\fontsize{10.5pt}{12.6pt}\selectfont\display@chineseheader}
+      \fancyhead[CO]{\fontsize{10.5pt}{12.6pt}\selectfont\leftmark}
+    }{
+      \fancyhead[CE]{\fontsize{10.5pt}{12.6pt}\selectfont\nouppercase\display@englishheader}
+      \fancyhead[CO]{\fontsize{10.5pt}{12.6pt}\selectfont\nouppercase\leftmark}
+    }
+  \fi
   \fancyfoot[CE,CO]{\fontsize{9pt}{10.8pt}\selectfont\thepage}
 }
 
@@ -899,7 +1037,8 @@ School: & \en@theschool \\
   \ifdefined\@BODY
   \else
     \ifnum\value{chapter}=1
-      \ifchinesebook{\chaptermark{绪论}}{\chaptermark{Introduction}}
+      % 取消第一章强制设为绪论页眉的格式
+      %\ifchinesebook{\chaptermark{绪论}}{\chaptermark{Introduction}}
       \setcounter{page}{1}
     \fi
   \fi
