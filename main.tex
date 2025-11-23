@@ -1,18 +1,12 @@
 
 \documentclass[master]{thesis-uestc}
+\setheadercontent{信软学院进阶式挑战性综合项目III中期报告}
 
-\title{时域积分方程时间步进算法及其快速算法}{The Time Marching Scheme of Time Domain
-    Integral Equation and Corresponding Fast Algorithm}
 
-\author{王稳}{Wang Wen}
-\advisor{赖生建\chinesespace 副教授}{Dr. Shengjian Lai}
-\school{物理电子学院}{School of Physical Electronics}
-\major{无线电物理}{Radio Physics}
-\studentnumber{201421040223}
 
 \begin{document}
 
-\makecover
+
 
 \begin{chineseabstract}
 为了适应日益增长的宽带信号和非线性系统的工程应用，用于分析瞬态电磁散射问题的时域积分方程方法研究日趋活跃。本文以时域积分方程时间步进算法及其快速算法为研究课题，重点研究了时间步进算法的数值实现技术、后时稳定性问题以及两层平面波算法加速计算等，主要研究内容分为四部分。
@@ -30,7 +24,7 @@ With the widespread engineering applications ranging from broadband signals and 
 
 \thesistableofcontents
 
-\chapter{绪\hspace{6pt}论}
+\chapter{绪论}
 
 \section{研究工作的背景与意义}
 
@@ -44,6 +38,35 @@ With the widespread engineering applications ranging from broadband signals and 
 
 \section{本论文的结构安排}
 本文的章节结构安排如下：
+
+\subsection{有序列表测试（enumerate）}
+本文主要包含以下几个部分：
+\begin{enumerate}
+  \item 第一章介绍了研究背景和意义
+  \item 第二章阐述了时域积分方程基础理论
+  \item 第三章讨论了算法实现的关键技术
+  \item 第四章给出了数值实验结果
+  \item 第五章总结了全文并展望未来研究方向
+\end{enumerate}
+
+\subsection{无序列表测试（itemize）}
+本研究采用的方法包括：
+\begin{itemize}
+  \item 时间步进算法（MOT）用于求解时域积分方程
+  \item 平面波时域算法（PWTD）加速矩阵向量乘积
+  \item RWG基函数进行空间离散
+  \item 三角脉冲函数进行时间离散
+\end{itemize}
+
+\subsection{描述列表测试（description）}
+主要符号说明：
+\begin{description}
+  \item[MOT] Marching-on-in-time，时间步进算法
+  \item[PWTD] Plane Wave Time-domain，平面波时域算法
+  \item[RWG] Rao-Wilton-Glisson，一种空间基函数
+  \item[TDIE] Time-domain Integral Equation，时域积分方程
+\end{description}
+
 
 \chapter{时域积分方程基础}
 时域积分方程（TDIE）方法作为分析瞬态电磁波动现象最主要的数值算法之一，常用于求解均匀散射体和表面散射体的瞬态电磁散射问题。
