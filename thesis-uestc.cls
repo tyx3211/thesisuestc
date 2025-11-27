@@ -188,6 +188,11 @@
 
 \AtBeginEnvironment{tabular}{\small}
 
+\RequirePackage{tabularx}
+
+% 【新增】针对自动换行表格
+\AtBeginEnvironment{tabularx}{\small}
+
 \newcommand{\chinesecolon}{\char"FF1A}
 \newcommand{\chinesespace}{\char"3000}
 \newcommand{\chineseperiod}{\char"3002}
